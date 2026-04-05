@@ -58,11 +58,6 @@ const PrivacyPolicyScreen = () => {
 
   const openPolicyUrl = async () => {
     try {
-      const supported = await Linking.canOpenURL(PRIVACY_POLICY_URL);
-      if (!supported) {
-        throw new Error('Unsupported privacy policy URL');
-      }
-
       await Linking.openURL(PRIVACY_POLICY_URL);
     } catch (error) {
       console.error('Failed to open privacy policy URL.', error);
