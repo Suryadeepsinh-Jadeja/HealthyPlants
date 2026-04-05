@@ -3,6 +3,7 @@ import { Alert, FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react
 import { useTranslation } from 'react-i18next';
 import { useIsFocused, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import DiseaseCard from '../components/DiseaseCard';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { theme } from '../theme';
@@ -17,6 +18,7 @@ const HistoryScreen = () => {
   const { t } = useTranslation();
   const navigation = useNavigation<HistoryScreenNavigationProp>();
   const isFocused = useIsFocused();
+  const insets = useSafeAreaInsets();
   const [history, setHistory] = useState<ScanHistoryItem[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -62,7 +64,7 @@ const HistoryScreen = () => {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { paddingBottom: insets.bottom + 8 }]}>
       <View style={styles.header}>
         <View style={styles.headerCopy}>
           <Text style={styles.title}>{t('history.title')}</Text>
@@ -98,7 +100,10 @@ const HistoryScreen = () => {
         <FlatList
           data={history}
           keyExtractor={item => item.id}
-          contentContainerStyle={styles.listContent}
+          contentContainerStyle={[
+            styles.listContent,
+            { paddingBottom: insets.bottom + 8 },
+          ]}
           renderItem={({ item }) => (
             <DiseaseCard
               item={item}
@@ -199,7 +204,7 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   listContent: {
-    paddingBottom: 24,
+    flexGrow: 1,
   },
   separator: {
     height: 12,

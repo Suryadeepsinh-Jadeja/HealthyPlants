@@ -103,25 +103,80 @@ npm run ios
 
 ## Android Release Build
 
-Release builds require a real signing configuration. Set these Gradle properties before building:
+Release builds require a real signing configuration.
+
+### 1. Create an Android upload keystore
+
+Run this from the `android` folder:
+
+```bash
+cd android
+keytool -genkeypair -v \
+  -storetype PKCS12 \
+  -keystore upload-keystore.jks \
+  -alias upload \
+  -keyalg RSA \
+  -keysize 2048 \
+  -validity 10000
+```
+
+That creates `android/upload-keystore.jks`.
+
+### 2. Add local signing properties
+
+Copy the example file and fill in your real values:
+
+```bash
+cd android
+cp keystore.properties.example keystore.properties
+```
+
+Set these values in `android/keystore.properties`:
 
 - `MYAPP_UPLOAD_STORE_FILE`
 - `MYAPP_UPLOAD_STORE_PASSWORD`
 - `MYAPP_UPLOAD_KEY_ALIAS`
 - `MYAPP_UPLOAD_KEY_PASSWORD`
 
-Then build a release artifact:
+Example:
+
+```properties
+MYAPP_UPLOAD_STORE_FILE=upload-keystore.jks
+MYAPP_UPLOAD_STORE_PASSWORD=your-store-password
+MYAPP_UPLOAD_KEY_ALIAS=upload
+MYAPP_UPLOAD_KEY_PASSWORD=your-key-password
+```
+
+`android/keystore.properties` and `*.jks` are ignored by git, so they will stay local.
+
+You can also provide the same values through environment variables if you prefer CI-based signing.
+
+### 3. Build a release APK
 
 ```bash
 cd android
 ./gradlew assembleRelease
 ```
 
+The APK will be generated here:
+
+```bash
+android/app/build/outputs/apk/release/app-release.apk
+```
+
+### 4. Build an Android App Bundle for Play Store
+
 For Google Play, prefer building an Android App Bundle:
 
 ```bash
 cd android
 ./gradlew bundleRelease
+```
+
+The AAB will be generated here:
+
+```bash
+android/app/build/outputs/bundle/release/app-release.aab
 ```
 
 ## Release Versioning
@@ -170,5 +225,5 @@ ios/             iOS native project
 ## Notes
 
 - Android is configured to keep `.tflite` files uncompressed during builds.
-- The Android package name is still `com.fasalrakshak`.
+- The Android package name is `com.healthyplants`.
 - The app currently requests camera permission only.

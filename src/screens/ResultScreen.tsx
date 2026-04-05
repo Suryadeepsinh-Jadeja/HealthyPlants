@@ -1,11 +1,12 @@
 import React, { useRef, useState, useEffect } from 'react';
 import {
   BackHandler, View, Text, StyleSheet, Image, ScrollView,
-  TouchableOpacity, Alert, Platform, StatusBar, Pressable,
+  TouchableOpacity, Alert, StatusBar, Pressable,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { CommonActions, RouteProp, useFocusEffect, useRoute, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import ViewShot from 'react-native-view-shot';
 import Share from 'react-native-share';
 
@@ -44,6 +45,7 @@ const ResultScreen = () => {
   const navigation = useNavigation<ResultScreenNavigationProp>();
   const viewShotRef = useRef<ViewShot>(null);
   const hasSavedRef = useRef(false);
+  const insets = useSafeAreaInsets();
 
   const { classification, imageUri, saveToHistory = true } = route.params;
   const [activeTab, setActiveTab] = useState<'organic' | 'chemical'>('organic');
@@ -365,12 +367,12 @@ const ResultScreen = () => {
     <View style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor={theme.colors.background} />
 
-      {/* FIX: replaced <View style={{ height: 90 }} /> with paddingTop on
-          container. Uses Platform.OS to get correct status bar offset. */}
-
       <ScrollView
         style={styles.scroll}
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[
+          styles.scrollContent,
+          { paddingBottom: insets.bottom + 112 },
+        ]}
         showsVerticalScrollIndicator={false}
       >
         <ViewShot ref={viewShotRef} options={{ format: 'jpg', quality: 0.9 }}>
@@ -391,7 +393,7 @@ const ResultScreen = () => {
 
       {/* FIX: action bar uses paddingBottom based on platform instead of
           hardcoded 30 — prevents buttons being cut off on gesture-nav phones. */}
-      <View style={styles.actionContainer}>
+      <View style={[styles.actionContainer, { paddingBottom: insets.bottom + 8 }]}>
         <TouchableOpacity style={styles.scanAgainButton} onPress={startNewScan} hitSlop={BUTTON_HIT_SLOP}>
           <View style={styles.actionButtonContent}>
             <CameraIcon size={20} color={theme.colors.textPrimary} />
@@ -411,14 +413,10 @@ const ResultScreen = () => {
 
 // ─── Styles ───────────────────────────────────────────────────────────────────
 
-const STATUS_BAR_HEIGHT = Platform.OS === 'android' ? StatusBar.currentHeight ?? 24 : 44;
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: theme.colors.background,
-    // FIX: paddingTop replaces the <View height={90}/> spacer
-    paddingTop: STATUS_BAR_HEIGHT,
   },
   scroll: { flex: 1 },
   scrollContent: { paddingBottom: 16 },
@@ -637,7 +635,6 @@ const styles = StyleSheet.create({
   actionContainer: {
     flexDirection: 'row',
     padding: 14,
-    paddingBottom: Platform.OS === 'ios' ? 32 : 18,
     backgroundColor: theme.colors.cardBackground,
     ...theme.shadows.medium,
     gap: 10,

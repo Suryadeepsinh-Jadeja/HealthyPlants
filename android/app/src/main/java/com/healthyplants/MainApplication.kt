@@ -1,4 +1,4 @@
-package com.fasalrakshak
+package com.healthyplants
 
 import android.app.Application
 import com.facebook.react.PackageList

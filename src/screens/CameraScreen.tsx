@@ -5,6 +5,7 @@ import { Camera, useCameraDevice, useCameraPermission } from 'react-native-visio
 import { launchImageLibrary } from 'react-native-image-picker';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { preprocessImage } from '../ml/preprocessor';
@@ -29,6 +30,7 @@ const CameraScreen = () => {
   const device = useCameraDevice('back');
   const { hasPermission, requestPermission } = useCameraPermission();
   const cameraRef = useRef<Camera>(null);
+  const insets = useSafeAreaInsets();
 
   const [torchOn, setTorchOn] = useState(false);
   const [autoMode, setAutoMode] = useState(false);
@@ -232,7 +234,7 @@ const CameraScreen = () => {
           position:absolute top:'15%' — they landed on the same pixel.
           Now they are in separate, non-overlapping zones.
       ──────────────────────────────────────────────────────────────────── */}
-      <View style={styles.topBar}>
+      <View style={[styles.topBar, { paddingTop: insets.top + 8 }]}>
         {/* Back button */}
         <TouchableOpacity
           style={styles.topBarButton}
@@ -280,7 +282,7 @@ const CameraScreen = () => {
           Gallery | Shutter | (spacer for symmetry)
           All controls in one dedicated row — no overlap possible.
       ──────────────────────────────────────────────────────────────────── */}
-      <View style={styles.bottomBar}>
+      <View style={[styles.bottomBar, { paddingBottom: insets.bottom + 8 }]}>
         <TouchableOpacity
           style={styles.sideButton}
           onPress={() => openGallery()}
@@ -307,7 +309,11 @@ const CameraScreen = () => {
 
       {/* Secret dev tap zone */}
       {DEV_MENU_ENABLED ? (
-        <TouchableOpacity style={styles.secretButton} onPress={handleSecretTap} activeOpacity={1} />
+        <TouchableOpacity
+          style={[styles.secretButton, { top: insets.top + 8 }]}
+          onPress={handleSecretTap}
+          activeOpacity={1}
+        />
       ) : null}
 
       {analyzing && <LoadingOverlay message={t('camera.analyzing')} showGuide={true} />}
@@ -329,7 +335,6 @@ const styles = StyleSheet.create({
     top: 0,
     left: 0,
     right: 0,
-    paddingTop: 48,          // safe area
     paddingBottom: 12,
     paddingHorizontal: 16,
     flexDirection: 'row',
@@ -410,7 +415,6 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    paddingBottom: 40,
     paddingTop: 20,
     paddingHorizontal: 32,
     flexDirection: 'row',
@@ -455,7 +459,7 @@ const styles = StyleSheet.create({
   },
 
   // ── Dev menu ─────────────────────────────────────────────────────────────────
-  secretButton: { position: 'absolute', top: 34, right: 10, width: 26, height: 26, zIndex: 100, opacity: 0.02 },
+  secretButton: { position: 'absolute', right: 10, width: 26, height: 26, zIndex: 100, opacity: 0.02 },
   devMenuOverlay: { flex: 1, justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.8)', padding: 20 },
   devMenuContainer: { backgroundColor: 'white', padding: 20, borderRadius: 10 },
   devMenuHeader: {

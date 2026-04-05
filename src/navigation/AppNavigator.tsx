@@ -7,6 +7,7 @@ import HomeScreen from '../screens/HomeScreen';
 import CameraScreen from '../screens/CameraScreen';
 import ResultScreen from '../screens/ResultScreen';
 import HistoryScreen from '../screens/HistoryScreen';
+import PrivacyPolicyScreen from '../screens/PrivacyPolicyScreen';
 import LanguageSwitcher from '../components/LanguageSwitcher';
 import { ClassificationResult } from '../ml/types';
 import { theme } from '../theme';
@@ -17,6 +18,7 @@ export type RootStackParamList = {
   Home: undefined;
   Camera: { openGallery?: boolean } | undefined;
   History: undefined;
+  Privacy: undefined;
   Result: {
     classification: ClassificationResult;
     imageUri: string;
@@ -35,6 +37,9 @@ const AppNavigator = () => {
       screenOptions={{
         headerStyle: {
           backgroundColor: theme.colors.primary,
+        },
+        contentStyle: {
+          backgroundColor: theme.colors.background,
         },
         headerTintColor: theme.colors.cardBackground,
         headerTitleStyle: {
@@ -97,6 +102,13 @@ const AppNavigator = () => {
         component={HistoryScreen}
         options={{
           headerTitle: t('nav.history'),
+        }}
+      />
+      <Stack.Screen
+        name="Privacy"
+        component={PrivacyPolicyScreen}
+        options={{
+          headerTitle: t('privacy.title', { defaultValue: 'Privacy Policy' }),
         }}
       />
     </Stack.Navigator>

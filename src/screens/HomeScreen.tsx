@@ -13,6 +13,7 @@ import { useTranslation } from 'react-i18next';
 import { useIsFocused, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { launchImageLibrary } from 'react-native-image-picker';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import DiseaseCard from '../components/DiseaseCard';
 import { CameraIcon, GalleryIcon } from '../components/AppIcons';
@@ -37,6 +38,7 @@ const HomeScreen = () => {
   const [recentScans, setRecentScans] = useState<ScanHistoryItem[]>([]);
   const [galleryProcessing, setGalleryProcessing] = useState(false);
   const isFocused = useIsFocused();
+  const insets = useSafeAreaInsets();
 
   useEffect(() => {
     const modelInterval = setInterval(() => {
@@ -128,7 +130,10 @@ const HomeScreen = () => {
 
       <ScrollView
         style={styles.container}
-        contentContainerStyle={styles.contentContainer}
+        contentContainerStyle={[
+          styles.contentContainer,
+          { paddingBottom: insets.bottom + 8 },
+        ]}
         showsVerticalScrollIndicator={false}
       >
         <LinearGradient
@@ -221,6 +226,16 @@ const HomeScreen = () => {
           <Text style={styles.historyButtonText}>{t('home.historyButton')}</Text>
         </TouchableOpacity>
 
+        <TouchableOpacity
+          style={styles.privacyButton}
+          onPress={() => navigation.navigate('Privacy')}
+          hitSlop={BUTTON_HIT_SLOP}
+        >
+          <Text style={styles.privacyButtonText}>
+            {t('privacy.openScreen', { defaultValue: 'Privacy Policy' })}
+          </Text>
+        </TouchableOpacity>
+
         <LinearGradient
           colors={['#FFFFFF', '#F8FBF2']}
           start={{ x: 0, y: 0 }}
@@ -282,7 +297,6 @@ const styles = StyleSheet.create({
   contentContainer: {
     paddingHorizontal: 20,
     paddingTop: 16,
-    paddingBottom: 32,
   },
   backgroundOrbOne: {
     position: 'absolute',
@@ -481,6 +495,19 @@ const styles = StyleSheet.create({
     color: '#1E5631',
     fontSize: theme.typography.md,
     fontWeight: '800',
+  },
+  privacyButton: {
+    alignSelf: 'center',
+    marginTop: -4,
+    marginBottom: 20,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+  },
+  privacyButtonText: {
+    color: '#2D7D32',
+    fontSize: theme.typography.sm,
+    fontWeight: '700',
+    textDecorationLine: 'underline',
   },
   tipContainer: {
     padding: 20,

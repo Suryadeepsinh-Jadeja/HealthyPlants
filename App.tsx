@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { View, Text, StyleSheet, Animated, StatusBar, Image } from 'react-native';
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { Camera } from 'react-native-vision-camera';
 
@@ -11,6 +12,15 @@ import { theme } from './src/theme';
 import ErrorBoundary from './src/components/ErrorBoundary';
 
 const SPLASH_LOGO = require('./logo_transparent_green.png');
+const MIN_SPLASH_DURATION_MS = 1200;
+const navigationTheme = {
+  ...DefaultTheme,
+  colors: {
+    ...DefaultTheme.colors,
+    background: theme.colors.background,
+    card: theme.colors.primary,
+  },
+};
 
 const SplashScreen = ({ title, subtitle }: { title: string; subtitle: string }) => {
   const scale = useRef(new Animated.Value(0.5)).current;
@@ -46,51 +56,64 @@ const SplashScreen = ({ title, subtitle }: { title: string; subtitle: string }) 
 
 const App = () => {
   const { t } = useTranslation();
-  const [modelLoading, setModelLoading] = useState(true);
-  const [permissionsGranted, setPermissionsGranted] = useState(false);
+  const [appReady, setAppReady] = useState(false);
+  const [permissionsGranted, setPermissionsGranted] = useState<boolean | null>(null);
 
   useEffect(() => {
-    const initModel = async () => {
+    let active = true;
+
+    const bootstrapApp = async () => {
+      const startedAt = Date.now();
+
       try {
         await loadModel();
       } catch (e) {
         console.error('Initial model load failed', e);
-      } finally {
-        setModelLoading(false);
       }
-    };
 
-    const checkPermissions = async () => {
       let cameraStatus = await Camera.getCameraPermissionStatus();
       if (cameraStatus !== 'granted') {
         cameraStatus = await Camera.requestCameraPermission();
       }
 
-      setPermissionsGranted(cameraStatus === 'granted');
+      if (active) {
+        setPermissionsGranted(cameraStatus === 'granted');
+      }
+
+      const elapsed = Date.now() - startedAt;
+      const remaining = Math.max(0, MIN_SPLASH_DURATION_MS - elapsed);
+
+      setTimeout(() => {
+        if (active) {
+          setAppReady(true);
+        }
+      }, remaining);
     };
 
-    Promise.all([initModel(), checkPermissions()]);
+    bootstrapApp();
+
+    return () => {
+      active = false;
+    };
   }, []);
-
-  if (modelLoading) {
-    return <SplashScreen title={t('app.name')} subtitle={t('app.tagline')} />;
-  }
-
-  if (!permissionsGranted) {
-    return (
-      <View style={styles.centerContainer}>
-        <StatusBar backgroundColor={theme.colors.background} barStyle="dark-content" />
-        <Text style={styles.errorText}>{t('error.cameraPermission')}</Text>
-      </View>
-    );
-  }
 
   return (
     <ErrorBoundary>
-      <NavigationContainer>
-        <StatusBar backgroundColor={theme.colors.primary} barStyle="light-content" />
-        <AppNavigator />
-      </NavigationContainer>
+      <SafeAreaProvider>
+        {!appReady ? (
+          <SplashScreen title={t('app.name')} subtitle={t('app.tagline')} />
+        ) : !permissionsGranted ? (
+          <View style={styles.centerContainer}>
+            <StatusBar backgroundColor={theme.colors.background} barStyle="dark-content" />
+            <Text style={styles.errorText}>{t('error.cameraPermission')}</Text>
+          </View>
+        ) : (
+          <NavigationContainer theme={navigationTheme}>
+            <StatusBar backgroundColor={theme.colors.primary} barStyle="light-content" />
+            <AppNavigator />
+          </NavigationContainer>
+        )}
+      </SafeAreaProvider>
     </ErrorBoundary>
   );
 };
