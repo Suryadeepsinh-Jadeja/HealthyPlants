@@ -124,6 +124,32 @@ cd android
 ./gradlew bundleRelease
 ```
 
+## Release Versioning
+
+This project uses `package.json` as the marketing version source of truth.
+
+- `package.json` version maps to Android `versionName`
+- `package.json` version maps to iOS `MARKETING_VERSION`
+- Android `versionCode` and iOS `CURRENT_PROJECT_VERSION` are derived from semantic version numbers
+
+Sync native versions after changing `package.json`:
+
+```bash
+npm run version:sync
+```
+
+Current scheme:
+
+- `1.0.0` -> build number `10000`
+- `1.2.3` -> build number `10203`
+
+Recommended release flow:
+
+1. Update `package.json` version.
+2. Run `npm run version:sync`.
+3. Commit the version bump.
+4. Build the release artifact.
+
 ## Project Structure
 
 ```text
