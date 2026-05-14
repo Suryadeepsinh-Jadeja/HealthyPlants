@@ -65,7 +65,7 @@ Supported labels:
 - npm
 - Android Studio and Android SDK
 - Java 17
-- Xcode and CocoaPods if you want to run iOS
+- Xcode, Ruby, Bundler, and CocoaPods if you want to run iOS
 
 ### Install Dependencies
 
@@ -73,11 +73,21 @@ Supported labels:
 npm install
 ```
 
+Python helpers currently use only the Python standard library, but a
+`requirements.txt` file is kept so the Python setup command stays consistent:
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install -r requirements.txt
+```
+
 For iOS:
 
 ```bash
+bundle install
 cd ios
-pod install
+bundle exec pod install
 cd ..
 ```
 
@@ -99,6 +109,56 @@ Run iOS:
 
 ```bash
 npm run ios
+```
+
+## Recreating Downloadable Files
+
+Large generated folders are intentionally not tracked by git. They can be
+deleted when you need disk space and recreated later from the checked-in files.
+
+Safe to delete and recreate:
+
+- `node_modules/` - restore with `npm install`
+- `.venv/` and `.venv311/` - recreate the one you need with `python3 -m venv .venv` or `python3.11 -m venv .venv311`, then run `python -m pip install -r requirements.txt` inside it
+- `android/app/build/` - recreated by `npm run android`, `cd android && ./gradlew assembleRelease`, or another Gradle build
+- `android/app/.cxx/` - recreated by Android native builds
+- `android/.gradle/` and `android/.kotlin/` - recreated by Gradle
+- `.DS_Store` files - recreated automatically by macOS
+- `.idea/` - recreated by IntelliJ or Android Studio if you reopen the project
+
+Do not delete these unless you have a secure backup:
+
+- `android/upload-keystore.jks`
+- `android/keystore.properties`
+
+Those files are local signing credentials. They are ignored by git and cannot be
+downloaded from npm, Gradle, or CocoaPods.
+
+After a cleanup, restore the main app dependencies with:
+
+```bash
+npm install
+```
+
+Restore Android build outputs by running:
+
+```bash
+npm run android
+```
+
+For a release build:
+
+```bash
+cd android
+./gradlew assembleRelease
+```
+
+Restore iOS pods, if needed:
+
+```bash
+bundle install
+cd ios
+bundle exec pod install
 ```
 
 ## Android Release Build
@@ -204,6 +264,32 @@ Recommended release flow:
 2. Run `npm run version:sync`.
 3. Commit the version bump.
 4. Build the release artifact.
+
+## Evaluation Helper
+
+You can generate a confusion matrix from a CSV of prediction results:
+
+```bash
+python3 scripts/generate_confusion_matrix.py scripts/example_confusion_input.csv
+```
+
+Expected CSV columns:
+
+- `image`
+- `predicted_label`
+- `true_label`
+- `confidence` (optional, ignored by the matrix builder)
+
+If your test images are grouped into class-named folders like
+`test_images/rice_blast/img_001.jpg`, you can let the script infer the
+`true_label` from the parent folder name:
+
+```bash
+python3 scripts/generate_confusion_matrix.py results.csv --true-label-from-parent-dir
+```
+
+The script prints the confusion matrix in the terminal and saves a matrix CSV
+beside the input file.
 
 ## Project Structure
 

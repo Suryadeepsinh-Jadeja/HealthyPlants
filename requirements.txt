@@ -1,0 +1,7 @@
+# Python helper dependencies for this repository.
+#
+# The checked-in Python scripts currently use only the Python standard library,
+# so this file is intentionally empty apart from comments. Keep it here so a
+# cleaned workspace can always run:
+#
+#   python -m pip install -r requirements.txt

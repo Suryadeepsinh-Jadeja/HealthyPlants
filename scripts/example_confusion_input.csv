@@ -1,0 +1,5 @@
+image,true_label,predicted_label,confidence
+test_images/rice_blast/img_001.jpg,rice_blast,rice_blast,0.94
+test_images/rice_blast/img_002.jpg,rice_blast,brown_spot,0.61
+test_images/brown_spot/img_003.jpg,brown_spot,brown_spot,0.89
+test_images/healthy/img_004.jpg,healthy,healthy,0.97
